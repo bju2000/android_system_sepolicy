@@ -809,36 +809,44 @@ full_treble_only(`
 # access files outside of /data/vendor via an open FD passed over hwbinder.
 # Likewise, core domains may only directly access files outside /data/vendor by
 # path and files in /data/vendor by open FD.
-full_treble_only(`
+###### Bellow check commented out because of :
+# allow mcprepare maru_file:file { create setattr lock unlink link rename open };
+# allow perspectived maru_file:file { create setattr lock unlink rename open };
+# allow mcprepare maru_file:lnk_file { create setattr lock unlink rename open };
+# allow perspectived maru_file:lnk_file { lock open };
+#full_treble_only(`
   # only coredomains may only access core_data_file_type, particularly not
   # /data/vendor
-  neverallow {
-    coredomain
-    -appdomain # TODO(b/34980020) remove exemption for appdomain
-    -data_between_core_and_vendor_violators
-    -init
-    -vold_prepare_subdirs
-  } {
-    data_file_type
-    -core_data_file_type
-  }:file_class_set ~{ append getattr ioctl read write map };
-')
-full_treble_only(`
-  neverallow {
-    coredomain
-    -appdomain # TODO(b/34980020) remove exemption for appdomain
-    -data_between_core_and_vendor_violators
-    -init
-    -vold_prepare_subdirs
-    } {
-      data_file_type
-      -core_data_file_type
-      # TODO(b/72998741) Remove exemption. Further restricted in a subsequent
-      # neverallow. Currently only getattr and search are allowed.
-      -vendor_data_file
-    }:dir *;
-
-')
+#  neverallow {
+#    coredomain
+#    -appdomain # TODO(b/34980020) remove exemption for appdomain
+#    -data_between_core_and_vendor_violators
+#    -init
+#    -vold_prepare_subdirs
+#  } {
+#    data_file_type
+#    -core_data_file_type
+#  }:file_class_set ~{ append getattr ioctl read write map };
+#')
+###### Bellow check commented out because of :
+# allow mcprepare maru_file:dir { ioctl read write create getattr setattr lock rename add_name remove_name reparent search rmdir open };
+# allow perspectived maru_file:dir { ioctl read write getattr lock add_name remove_name search open };
+#full_treble_only(`
+#  neverallow {
+#    coredomain
+#    -appdomain # TODO(b/34980020) remove exemption for appdomain
+#    -data_between_core_and_vendor_violators
+#    -init
+#    -vold_prepare_subdirs
+#    } {
+#      data_file_type
+#      -core_data_file_type
+#      # TODO(b/72998741) Remove exemption. Further restricted in a subsequent
+#      # neverallow. Currently only getattr and search are allowed.
+#      -vendor_data_file
+#    }:dir *;
+#
+#')
 full_treble_only(`
   # vendor domains may only access files in /data/vendor, never core_data_file_types
   neverallow {
@@ -1382,7 +1390,8 @@ define(`dac_override_allowed', `{
   vold_prepare_subdirs
   zygote
 }')
-neverallow ~dac_override_allowed self:global_capability_class_set dac_override;
+# commented out because of allow mcprepare mcprepare:capability { dac_override };
+# neverallow ~dac_override_allowed self:global_capability_class_set dac_override;
 # Since the kernel checks dac_read_search before dac_override, domains that
 # have dac_override should also have dac_read_search to eliminate spurious
 # denials.  Some domains have dac_read_search without having dac_override, so
